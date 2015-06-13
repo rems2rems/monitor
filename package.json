@@ -1,0 +1,22 @@
+{
+  "name": "monitor",
+  "version": "0.0.0",
+  "description": "the monitoring project for openbeelab",
+  "main": "index.js",
+  "dependencies": {
+    "moment": "~2.9.0",
+    "nodemailer": "~1.3.0",
+    "nodemailer-smtp-transport": "~0.1.13",
+    "sendmail": "~0.2.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://dev.openbeelab.org/remy/monitoring.git"
+  },
+  "author": "",
+  "license": "GPLv3"
+}
