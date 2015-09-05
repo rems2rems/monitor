@@ -3,7 +3,7 @@ moment = require 'moment'
 
 config = require './config'
 
-db = require('../../dbUtil/javascript/dbUtil').configuredDriver(config.services.database)
+db = require('../../openbeelab-db-util/javascript/dbUtil').configuredDriver(config.services.database)
 
 db.exists (err,exists)->
 

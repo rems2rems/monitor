@@ -4,8 +4,8 @@ moment = require 'moment'
 config = require './config'
 dbConfig = config.services.database
 
-db = require('../../dbUtil/javascript/dbUtil').database(dbConfig)
-#db = require('../../dbUtil/javascript/mockDbForAlerts')
+db = require('../../openbeelab-db-util/javascript/dbUtil').database(dbConfig)
+#db = require('../../openbeelab-db-util/javascript/mockDbForAlerts')
 
 db.exists (err,exists)->
 
