@@ -1,3 +1,7 @@
+###
+this script has been added to root cron on server dev.openbeelab.org with the following config:
+*/5 * * * * /usr/local/bin/node /root/openbeelab-db-monitoring/javascript/insert_weight_for_roman_scales.js &>/dev/null
+###
 
 config = require './config'
 dbConfig = config.services.database
@@ -5,17 +9,8 @@ dbConfig = config.services.database
 db = require('../../openbeelab-db-util/javascript/dbUtil').database(dbConfig)
 #db = require('../../openbeelab-db-util/javascript/mockDbForAlerts')
 
-# search orphan deltas
-# for each orphan delta
-#     fetch last weight
-#     insert new updated weight
-#     update last weight
-#     update delta as ok
-
-
 db.get('_design/orphan_deltas/_view/by_date?limit=1')
 .then (orphans)->
-
     
     if orphans?.rows?.length > 0
         console.log "orphan found"
