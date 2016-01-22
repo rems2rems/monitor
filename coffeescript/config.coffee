@@ -3,11 +3,14 @@ module.exports =
     services :
 
         database :
-            host : 'localhost'
+            host : '77.207.158.40'
             protocol : 'http'
             port : 5984
-            name : 'la_mine'
-            apiary_name : 'la_mine_rucher_01'
+            auth :
+                username : 'admin'
+                password : 'c0uchAdm1n'
+            name : 'fred_db'
+            apiary_name : 'rucher_001'
 
         mailer : 
             service : 'gmail'

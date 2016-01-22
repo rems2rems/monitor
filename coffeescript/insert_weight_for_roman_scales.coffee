@@ -1,12 +1,12 @@
 ###
 this script has been added to root cron on server dev.openbeelab.org with the following config:
-*/5 * * * * /usr/local/bin/node /root/openbeelab-db-monitoring/javascript/insert_weight_for_roman_scales.js &>/dev/null
+* * * * * /usr/local/bin/node /root/openbeelab-db-monitoring/javascript/insert_weight_for_roman_scales.js &>/dev/null
 ###
 
 config = require './config'
 dbConfig = config.services.database
 
-db = require('../../openbeelab-db-util/javascript/dbUtil').database(dbConfig)
+db = require('../../openbeelab-db-util/javascript/dbDriver').connectToServer(dbConfig.database).useDb(config.database.name + "_config")
 #db = require('../../openbeelab-db-util/javascript/mockDbForAlerts')
 
 db.get('_design/orphan_deltas/_view/by_date?limit=1')
@@ -15,11 +15,11 @@ db.get('_design/orphan_deltas/_view/by_date?limit=1')
     if orphans?.rows?.length > 0
         console.log "orphan found"
         orphan = orphans.rows[0].value
-        # console.log "orphan="
-        # console.log orphan._id
-        # console.log orphan.beehouse_id
-        # console.log orphan.timestamp
-        # console.log "-----"
+        console.log "orphan="
+        console.log orphan._id
+        console.log orphan.beehouse_id
+        console.log orphan.timestamp
+        console.log "-----"
 
         lastWeightUrl = '_design/global_weight/_view/by_beehouse_and_date?startkey=["' + orphan.beehouse_id + '",{}]&endkey=["' + orphan.beehouse_id + '"]&descending=true&limit=1'
         db.get(lastWeightUrl)
@@ -27,11 +27,11 @@ db.get('_design/orphan_deltas/_view/by_date?limit=1')
 
             if lastWeight?.rows?.length > 0
                 lastWeight = lastWeight.rows[0].value
-                # console.log "lastWeight="
-                # console.log lastWeight._id
-                # console.log lastWeight.beehouse_id
-                # console.log lastWeight.timestamp
-                # console.log "-----"
+                console.log "lastWeight="
+                console.log lastWeight._id
+                console.log lastWeight.beehouse_id
+                console.log lastWeight.timestamp
+                console.log "-----"
 
                 delete lastWeight._id
                 delete lastWeight._rev

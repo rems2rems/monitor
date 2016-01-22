@@ -1,91 +1,101 @@
 
 moment = require 'moment'
-
+Promise = require 'promise'
 config = require './config'
 dbConfig = config.services.database
 
-db = require('../../openbeelab-db-util/javascript/dbUtil').database(dbConfig)
+db = require('../../openbeelab-db-util/javascript/dbDriver').connectToServer(dbConfig.database).useDb(config.database.name + "_config")
 #db = require('../../openbeelab-db-util/javascript/mockDbForAlerts')
 
-db.exists (err,exists)->
+db.exists()
+.then (exists)->
 
-    if err or not exists
+    if not exists
 
-        for admin in config.admins
+        Promise.reject("db doesnt exist")
 
-            do (admin)->
+    return exists
 
-                mailer = require './mailTransporter'
-                                                      
-                mailOptions = #✔
-                    from: 'openbeelab beehouse monitoring ✔ <remy.openbeelab@gmail.com>'
-                    to: admin.email
-                    subject: 'db down'
-                    text: 'openbeelab db seems to be down...'# + err + " exists: " + exists
+.then (exists)->
 
-                mailer.sendMail mailOptions, (error, info)->
+    db.get '_design/apiaries/_view/by_name'
+    .then (apiaries)->
 
-                    if error
-                        console.log error
-                    else
-                        console.log 'Message sent: ' + info.response
+        for apiary in apiaries
 
-    else
+            do (apiary)->
+                apiary = apiary.value
 
-        db.get '_design/apiaries/_view/by_name',(err,apiaries)->
+                if apiary.beehouses?
 
-            for apiary in apiaries
+                    for beehouse_id in apiary.beehouses
 
-                do (apiary)->
-                    apiary = apiary.value
+                        do (beehouse_id)->
 
-                    if apiary.beehouses?
+                            db.get beehouse_id
+                            .then (beehouse)->
 
-                        for beehouse_id in apiary.beehouses
+                                if beehouse?.isActive
 
-                            do (beehouse_id)->
+                                    lastMeasureUrl = '_design/' + beehouse.name + '/_view/weight?descending=true&limit=1'
 
-                                db.get beehouse_id,(err,beehouse)->
+                                    db.get lastMeasureUrl
+                                    .then (lastMeasure)->
 
-                                    if not err and beehouse?.isActive
+                                        if lastMeasure?
 
-                                        lastMeasureUrl = '_design/' + beehouse.name + '/_view/weight?descending=true&limit=1'
+                                            lastMeasure = lastMeasure.rows[0].value
+                                            
+                                            now = moment(new Date())
+                                            lastMeasureTime = moment(new Date(lastMeasure.timestamp))
+                                            trigger = config.alerts.connectionTrigger
+                                            alertTime = lastMeasureTime.add(trigger.value,trigger.unit )
 
-                                        db.get lastMeasureUrl,(err,lastMeasure)->
+                                            if now.isAfter(alertTime)
 
-                                            if not err and lastMeasure?
+                                                if apiary.beekeepers? and apiary.beekeepers.length > 0
 
-                                                lastMeasure = lastMeasure.rows[0].value
-                                                
-                                                now = moment(new Date())
-                                                lastMeasureTime = moment(new Date(lastMeasure.timestamp))
-                                                trigger = config.alerts.connectionTrigger
-                                                alertTime = lastMeasureTime.add(trigger.value,trigger.unit )
+                                                    for beekeeper_id in apiary.beekeepers
 
-                                                if now.isAfter(alertTime)
+                                                        do (beekeeper_id)->
 
-                                                    if apiary.beekeepers? and apiary.beekeepers.length > 0
+                                                            db.get beekeeper_id
+                                                            .then (beekeeper)->
 
-                                                        for beekeeper_id in apiary.beekeepers
+                                                                mailer = require './mailTransporter'
+                                                                
+                                                                diff = now.diff(lastMeasureTime,'minutes')
+                                                                
+                                                                mailOptions = #✔
+                                                                    from: 'openbeelab beehouse monitoring ✔ <remy.openbeelab@gmail.com>'
+                                                                    to: beekeeper.email
+                                                                    subject: 'beehouse disconnected'
+                                                                    text: 'beehouse ' + beehouse.name + ' from apiary ' + apiary.name + ' didn\'t send data since ' + diff + ' minutes.'
+                                                                    #html: '<b>Hello world ✔</b>'
 
-                                                            do (beekeeper_id)->
-
-                                                                db.get beekeeper_id,(err,beekeeper)->
-
-                                                                    mailer = require './mailTransporter'
+                                                                mailer.sendMail mailOptions, (error, info)->
                                                                     
-                                                                    diff = now.diff(lastMeasureTime,'minutes')
-                                                                    
-                                                                    mailOptions = #✔
-                                                                        from: 'openbeelab beehouse monitoring ✔ <remy.openbeelab@gmail.com>'
-                                                                        to: beekeeper.email
-                                                                        subject: 'beehouse disconnected'
-                                                                        text: 'beehouse ' + beehouse.name + ' from apiary ' + apiary.name + ' didn\'t send data since ' + diff + ' minutes.'
-                                                                        #html: '<b>Hello world ✔</b>'
+                                                                    if error
+                                                                        console.log error
+                                                                    else
+                                                                        console.log 'Message sent: ' + info.response                                               
+.catch (err)->
 
-                                                                    mailer.sendMail mailOptions, (error, info)->
-                                                                        
-                                                                        if error
-                                                                            console.log error
-                                                                        else
-                                                                            console.log 'Message sent: ' + info.response                                               
+    for admin in config.admins
+
+        do (admin)->
+
+            mailer = require './mailTransporter'
+                                                  
+            mailOptions = #✔
+                from: 'openbeelab beehouse monitoring ✔ <remy.openbeelab@gmail.com>'
+                to: admin.email
+                subject: 'db down'
+                text: 'openbeelab db seems to be down...'# + err + " exists: " + exists
+
+            mailer.sendMail mailOptions, (error, info)->
+
+                if error
+                    console.log error
+                else
+                    console.log 'Message sent: ' + info.response
