@@ -6,10 +6,11 @@ this script has been added to root cron on server dev.openbeelab.org with the fo
 config = require './config'
 dbConfig = config.services.database
 
-db = require('../../openbeelab-db-util/javascript/dbDriver').connectToServer(dbConfig.database).useDb(config.database.name + "_config")
-#db = require('../../openbeelab-db-util/javascript/mockDbForAlerts')
+dbDriver = require('../../openbeelab-db-util/javascript/dbDriver')
+dbServer = dbDriver.connectToServer(dbConfig.database)
+db = dbServer.useDb(config.database.name + "_data")
 
-db.get('_design/orphan_deltas/_view/by_date?limit=1')
+db.get('_design/beehouse_monitoring/_view/new_relative_data?limit=1')
 .then (orphans)->
     
     if orphans?.rows?.length > 0

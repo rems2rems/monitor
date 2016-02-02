@@ -6,7 +6,7 @@
 
   dbConfig = config.services.database;
 
-  db = require('../../openbeelab-db-util/javascript/dbUtil').database(dbConfig);
+  db = require('../../openbeelab-db-util/javascript/dbDriver').connectToServer(dbConfig.database).useDb(config.database.name + "_config");
 
   db.get('_design/ruche2/_view/deltas').then(function(result) {
     var delta, deltas, i, len, results;

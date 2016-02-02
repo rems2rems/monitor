@@ -6,15 +6,19 @@ this script has been added to root cron on server dev.openbeelab.org with the fo
  */
 
 (function() {
-  var config, db, dbConfig;
+  var config, db, dbConfig, dbDriver, dbServer;
 
   config = require('./config');
 
   dbConfig = config.services.database;
 
-  db = require('../../openbeelab-db-util/javascript/dbUtil').database(dbConfig);
+  dbDriver = require('../../openbeelab-db-util/javascript/dbDriver');
 
-  db.get('_design/orphan_deltas/_view/by_date?limit=1').then(function(orphans) {
+  dbServer = dbDriver.connectToServer(dbConfig.database);
+
+  db = dbServer.useDb(config.database.name + "_data");
+
+  db.get('_design/beehouse_monitoring/_view/new_relative_data?limit=1').then(function(orphans) {
     var lastWeightUrl, orphan, ref;
     if ((orphans != null ? (ref = orphans.rows) != null ? ref.length : void 0 : void 0) > 0) {
       console.log("orphan found");

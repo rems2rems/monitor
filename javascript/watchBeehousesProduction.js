@@ -6,7 +6,7 @@
 
   config = require('./config');
 
-  db = require('../../openbeelab-db-util/javascript/dbUtil').configuredDriver(config.services.database);
+  db = require('../../openbeelab-db-util/javascript/dbDriver').connectToServer(config.services.database);
 
   db.exists(function(err, exists) {
     if (!err && exists) {

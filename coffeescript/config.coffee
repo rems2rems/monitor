@@ -12,7 +12,7 @@ module.exports =
             name : 'fred_db'
             apiary_name : 'rucher_001'
 
-        mailer : 
+        mailer :
             service : 'gmail'
             auth :
                 user : 'remy.openbeelab'
