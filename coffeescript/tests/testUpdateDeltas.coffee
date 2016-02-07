@@ -17,6 +17,7 @@ updateDeltas = require '../update_deltas'
 #console.log TimeShift.Date
 #TimeShift = require('timeshift-js')
 #Date = TimeShift.Date
+sinon = require 'sinon'
 
 weight =
     type : "measure"
@@ -46,9 +47,19 @@ delta2 =
     measureOrigin : "automatic"
     beehouse_id : "abeehouse"
 
+db = null
+
 describe "the update delta function:",->
 
     before (done)->
+        
+        mockDriver = {}
+        mockDriver.connectToServer = sinon.stub({},"connectToServer",()-> 
+            db = {}
+            db.get = sinon.stub({},"get")
+            #db.get.onCall(
+            return sinon.)
+        db.expects("get").calledWith("
         
         dataDb.create()
         .then ()->
@@ -57,7 +68,8 @@ describe "the update delta function:",->
 
             Promise.all([dataDb.save(weight),dataDb.save(delta1),dataDb.save(delta2)])
         
-        .then -> done()
+            done()
+
         .catch (err)-> console.log(err); done(err)
 
     after (done)->
@@ -67,13 +79,15 @@ describe "the update delta function:",->
     
     it "should update delta, and create new absolute measure", (done)->
         
+        console.log(dbServer)
         updateDeltas(dataDb,"beehouse","abeehouse","global-weight")
         .then () ->
        
             dataDb.get '_design/beehouse/_view/global-weight-delta'
 
         .then (deltas)->
-
+            
+            console.log("deltas == 0")
             deltas.total_rows.must.be(0)
             dataDb.get '_design/beehouse/_view/global-weight'
 

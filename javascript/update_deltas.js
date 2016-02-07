@@ -4,10 +4,13 @@
 
   update = function(db, objectType, objectId, measureName) {
     var endKey, startKey;
+    console.log("----->");
     endKey = '[' + objectId + ']';
     startKey = '[' + objectId + ',{}]';
     return db.get('_design/' + objectType + '/_view/' + measureName + '-delta?startkey=' + startKey + '&endkey=' + endKey + '&descending=true&limit=1').then(function(deltas) {
       var delta;
+      console.log(db.dbs);
+      console.log(deltas);
       if (deltas.total_rows === 0) {
         return;
       }

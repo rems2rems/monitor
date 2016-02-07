@@ -54,8 +54,7 @@
       return dataDb.create().then(function() {
         return createViews(dataDb, "data");
       }).then(function() {
-        return Promise.all([dataDb.save(weight), dataDb.save(delta1), dataDb.save(delta2)]);
-      }).then(function() {
+        Promise.all([dataDb.save(weight), dataDb.save(delta1), dataDb.save(delta2)]);
         return done();
       })["catch"](function(err) {
         console.log(err);
@@ -67,9 +66,11 @@
       return done();
     });
     return it("should update delta, and create new absolute measure", function(done) {
+      console.log(dbServer);
       return updateDeltas(dataDb, "beehouse", "abeehouse", "global-weight").then(function() {
         return dataDb.get('_design/beehouse/_view/global-weight-delta');
       }).then(function(deltas) {
+        console.log("deltas == 0");
         deltas.total_rows.must.be(0);
         return dataDb.get('_design/beehouse/_view/global-weight');
       }).then(function(weights) {

@@ -1,12 +1,14 @@
 
 update = (db,objectType,objectId,measureName)->
 
-
+    console.log("----->")
     endKey = '[' + objectId + ']'
     startKey = '[' + objectId + ',{}]'
     db.get('_design/' + objectType + '/_view/' + measureName + '-delta?startkey='+startKey+'&endkey='+endKey+'&descending=true&limit=1')
     .then (deltas)->
-    
+        
+        console.log(db.dbs)
+        console.log(deltas)
         if deltas.total_rows == 0
             return
 

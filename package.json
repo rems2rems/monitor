@@ -10,6 +10,7 @@
     "nodemailer-smtp-transport": "~0.1.13",
     "promise": "^7.1.1",
     "sendmail": "~0.2.1",
+    "sinon": "^1.17.3",
     "timeshift-js": "^1.0.0"
   },
   "devDependencies": {},
